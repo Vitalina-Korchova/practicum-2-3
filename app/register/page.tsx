@@ -1,77 +1,87 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useAuth } from '@/components/auth-provider'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { createUser, getUsersWithPasswords } from '@/lib/storage'
-import { toast } from 'sonner'
-import { PenLine, Eye, EyeOff } from 'lucide-react'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/components/auth-provider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { createUser, getUsersWithPasswords } from "@/lib/storage";
+import { toast } from "sonner";
+import { PenLine, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const { login } = useAuth()
+  const router = useRouter();
+  const { login } = useAuth();
 
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [isPending, setIsPending] = useState(false)
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [errors, setErrors] = useState<{
-    name?: string
-    email?: string
-    password?: string
-    confirmPassword?: string
-  }>({})
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   const validate = () => {
-    const errs: typeof errors = {}
-    if (!name.trim()) errs.name = "Імʼя обовʼязкове"
-    else if (name.trim().length < 2) errs.name = "Імʼя має містити мінімум 2 символи"
-    if (!email) errs.email = 'Email обовʼязковий'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Невірний формат email'
-    if (!password) errs.password = 'Пароль обовʼязковий'
-    else if (password.length < 6) errs.password = 'Пароль має містити мінімум 6 символів'
-    if (!confirmPassword) errs.confirmPassword = 'Підтвердіть пароль'
-    else if (password !== confirmPassword) errs.confirmPassword = 'Паролі не співпадають'
-    return errs
-  }
+    const errs: typeof errors = {};
+    if (!name.trim()) errs.name = "Імʼя обовʼязкове";
+    else if (name.trim().length < 2)
+      errs.name = "Імʼя має містити мінімум 2 символи";
+    if (!email) errs.email = "Email обовʼязковий";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      errs.email = "Невірний формат email";
+    if (!password) errs.password = "Пароль обовʼязковий";
+    else if (password.length < 6)
+      errs.password = "Пароль має містити мінімум 6 символів";
+    if (!confirmPassword) errs.confirmPassword = "Підтвердіть пароль";
+    else if (password !== confirmPassword)
+      errs.confirmPassword = "Паролі не співпадають";
+    return errs;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const errs = validate()
+    e.preventDefault();
+    const errs = validate();
     if (Object.keys(errs).length > 0) {
-      setErrors(errs)
-      return
+      setErrors(errs);
+      return;
     }
-    setErrors({})
-    setIsPending(true)
+    setErrors({});
+    setIsPending(true);
 
     // Check if email already exists
-    const existingUsers = getUsersWithPasswords()
+    const existingUsers = getUsersWithPasswords();
     if (existingUsers.some((u) => u.email === email.toLowerCase().trim())) {
-      setErrors({ email: 'Користувач з таким email вже існує' })
-      setIsPending(false)
-      return
+      setErrors({ email: "Користувач з таким email вже існує" });
+      setIsPending(false);
+      return;
     }
 
-    // Create user in localStorage
     const user = createUser({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password,
-      role: 'reader',
-    })
+      role: "reader",
+    });
 
-    setIsPending(false)
-    login(user)
-    toast.success('Реєстрація успішна!')
-    router.push('/dashboard')
-  }
+    setIsPending(false);
+    login(user);
+    toast.success("Реєстрація успішна!");
+    router.push("/dashboard");
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
@@ -129,7 +139,7 @@ export default function RegisterPage() {
                 <Input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   placeholder="Мінімум 6 символів"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -140,7 +150,11 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
               {errors.password && (
@@ -154,23 +168,25 @@ export default function RegisterPage() {
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Повторіть пароль"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+                <p className="text-sm text-destructive">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? 'Реєстрація...' : 'Зареєструватися'}
+              {isPending ? "Реєстрація..." : "Зареєструватися"}
             </Button>
             <p className="text-sm text-muted-foreground">
-              Вже маєте обліковий запис?{' '}
+              Вже маєте обліковий запис?{" "}
               <Link href="/login" className="text-primary hover:underline">
                 Увійти
               </Link>
@@ -179,5 +195,5 @@ export default function RegisterPage() {
         </form>
       </Card>
     </div>
-  )
+  );
 }

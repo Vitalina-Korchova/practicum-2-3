@@ -1,12 +1,18 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/auth-provider'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth-provider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -14,7 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -23,14 +29,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,50 +47,50 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { getUsers, updateUser, deleteUser, createUser } from '@/lib/storage'
-import type { User, UserRole } from '@/lib/types'
-import { toast } from 'sonner'
-import { Plus, Pencil, Trash2, Shield, PenLine, Eye } from 'lucide-react'
+} from "@/components/ui/alert-dialog";
+import { getUsers, updateUser, deleteUser, createUser } from "@/lib/storage";
+import type { User, UserRole } from "@/lib/types";
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2, Shield, PenLine, Eye } from "lucide-react";
 
 export default function UsersPage() {
-  const router = useRouter()
-  const { user: currentUser } = useAuth()
-  const [users, setUsers] = useState<User[]>([])
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
-  
+  const router = useRouter();
+  const { user: currentUser } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
   // New user form
-  const [newName, setNewName] = useState('')
-  const [newEmail, setNewEmail] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [newRole, setNewRole] = useState<UserRole>('reader')
-  
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newRole, setNewRole] = useState<UserRole>("reader");
+
   // Edit user form
-  const [editName, setEditName] = useState('')
-  const [editRole, setEditRole] = useState<UserRole>('reader')
+  const [editName, setEditName] = useState("");
+  const [editRole, setEditRole] = useState<UserRole>("reader");
 
   useEffect(() => {
-    if (currentUser?.role !== 'admin') {
-      router.push('/dashboard')
-      return
+    if (currentUser?.role !== "admin") {
+      router.push("/dashboard");
+      return;
     }
-    loadUsers()
-  }, [currentUser, router])
+    loadUsers();
+  }, [currentUser, router]);
 
   const loadUsers = () => {
-    setUsers(getUsers())
-  }
+    setUsers(getUsers());
+  };
 
   const handleAddUser = () => {
     if (!newName.trim() || !newEmail.trim() || !newPassword.trim()) {
-      toast.error('Заповніть усі поля')
-      return
+      toast.error("Заповніть усі поля");
+      return;
     }
 
     if (users.some((u) => u.email === newEmail)) {
-      toast.error('Користувач з таким email вже існує')
-      return
+      toast.error("Користувач з таким email вже існує");
+      return;
     }
 
     createUser({
@@ -92,86 +98,98 @@ export default function UsersPage() {
       email: newEmail.trim(),
       password: newPassword,
       role: newRole,
-    })
+    });
 
-    toast.success('Користувача додано')
-    setIsAddDialogOpen(false)
-    setNewName('')
-    setNewEmail('')
-    setNewPassword('')
-    setNewRole('reader')
-    loadUsers()
-  }
+    toast.success("Користувача додано");
+    setIsAddDialogOpen(false);
+    setNewName("");
+    setNewEmail("");
+    setNewPassword("");
+    setNewRole("reader");
+    loadUsers();
+  };
 
   const handleEditUser = () => {
     if (!editingUser || !editName.trim()) {
-      toast.error('Введіть ім\'я')
-      return
+      toast.error("Введіть ім'я");
+      return;
     }
 
     updateUser(editingUser.id, {
       name: editName.trim(),
       role: editRole,
-    })
+    });
 
-    toast.success('Дані оновлено')
-    setEditingUser(null)
-    loadUsers()
-  }
+    toast.success("Дані оновлено");
+    setEditingUser(null);
+    loadUsers();
+  };
 
   const handleDeleteUser = (id: string) => {
     if (id === currentUser?.id) {
-      toast.error('Ви не можете видалити себе')
-      return
+      toast.error("Ви не можете видалити себе");
+      return;
     }
 
-    const success = deleteUser(id)
+    const success = deleteUser(id);
     if (success) {
-      toast.success('Користувача видалено')
-      loadUsers()
+      toast.success("Користувача видалено");
+      loadUsers();
     } else {
-      toast.error('Помилка при видаленні')
+      toast.error("Помилка при видаленні");
     }
-  }
+  };
 
   const openEditDialog = (user: User) => {
-    setEditingUser(user)
-    setEditName(user.name)
-    setEditRole(user.role)
-  }
+    setEditingUser(user);
+    setEditName(user.name);
+    setEditRole(user.role);
+  };
 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
-      case 'admin':
-        return <Shield className="h-4 w-4" />
-      case 'author':
-        return <PenLine className="h-4 w-4" />
+      case "admin":
+        return <Shield className="h-4 w-4" />;
+      case "author":
+        return <PenLine className="h-4 w-4" />;
       default:
-        return <Eye className="h-4 w-4" />
+        return <Eye className="h-4 w-4" />;
     }
-  }
+  };
 
   const getRoleBadge = (role: UserRole) => {
     switch (role) {
-      case 'admin':
-        return <Badge className="gap-1"><Shield className="h-3 w-3" /> Адміністратор</Badge>
-      case 'author':
-        return <Badge variant="secondary" className="gap-1"><PenLine className="h-3 w-3" /> Автор</Badge>
+      case "admin":
+        return (
+          <Badge className="gap-1">
+            <Shield className="h-3 w-3" /> Адміністратор
+          </Badge>
+        );
+      case "author":
+        return (
+          <Badge variant="secondary" className="gap-1">
+            <PenLine className="h-3 w-3" /> Автор
+          </Badge>
+        );
       default:
-        return <Badge variant="outline" className="gap-1"><Eye className="h-3 w-3" /> Читач</Badge>
+        return (
+          <Badge variant="outline" className="gap-1">
+            <Eye className="h-3 w-3" /> Читач
+          </Badge>
+        );
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('uk-UA', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  }
+    return new Date(dateString).toLocaleDateString("uk-UA", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
-  if (currentUser?.role !== 'admin') {
-    return null
+  if (currentUser?.role !== "admin") {
+    return null;
   }
 
   return (
@@ -179,7 +197,9 @@ export default function UsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Користувачі</h1>
-          <p className="text-muted-foreground">Управління користувачами системи</p>
+          <p className="text-muted-foreground">
+            Управління користувачами системи
+          </p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -235,7 +255,10 @@ export default function UsersPage() {
                 <label htmlFor="newRole" className="text-sm font-medium">
                   Роль
                 </label>
-                <Select value={newRole} onValueChange={(v) => setNewRole(v as UserRole)}>
+                <Select
+                  value={newRole}
+                  onValueChange={(v) => setNewRole(v as UserRole)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -260,7 +283,10 @@ export default function UsersPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddDialogOpen(false)}
+              >
                 Скасувати
               </Button>
               <Button onClick={handleAddUser}>Додати</Button>
@@ -273,7 +299,10 @@ export default function UsersPage() {
         <CardHeader>
           <CardTitle>Список користувачів</CardTitle>
           <CardDescription>
-            Всього: {users.length} | Адміністратори: {users.filter((u) => u.role === 'admin').length} | Автори: {users.filter((u) => u.role === 'author').length} | Читачі: {users.filter((u) => u.role === 'reader').length}
+            Всього: {users.length} | Адміністратори:{" "}
+            {users.filter((u) => u.role === "admin").length} | Автори:{" "}
+            {users.filter((u) => u.role === "author").length} | Читачі:{" "}
+            {users.filter((u) => u.role === "reader").length}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -293,19 +322,30 @@ export default function UsersPage() {
                   <TableCell className="font-medium">
                     {user.name}
                     {user.id === currentUser?.id && (
-                      <Badge variant="outline" className="ml-2">Ви</Badge>
+                      <Badge variant="outline" className="ml-2">
+                        Ви
+                      </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {user.email}
+                  </TableCell>
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {formatDate(user.createdAt)}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-2">
-                      <Dialog open={editingUser?.id === user.id} onOpenChange={(open) => !open && setEditingUser(null)}>
+                      <Dialog
+                        open={editingUser?.id === user.id}
+                        onOpenChange={(open) => !open && setEditingUser(null)}
+                      >
                         <DialogTrigger asChild>
-                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(user)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditDialog(user)}
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
@@ -318,7 +358,10 @@ export default function UsersPage() {
                           </DialogHeader>
                           <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                              <label htmlFor="editName" className="text-sm font-medium">
+                              <label
+                                htmlFor="editName"
+                                className="text-sm font-medium"
+                              >
                                 Ім&apos;я
                               </label>
                               <Input
@@ -329,10 +372,18 @@ export default function UsersPage() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <label htmlFor="editRole" className="text-sm font-medium">
+                              <label
+                                htmlFor="editRole"
+                                className="text-sm font-medium"
+                              >
                                 Роль
                               </label>
-                              <Select value={editRole} onValueChange={(v) => setEditRole(v as UserRole)}>
+                              <Select
+                                value={editRole}
+                                onValueChange={(v) =>
+                                  setEditRole(v as UserRole)
+                                }
+                              >
                                 <SelectTrigger>
                                   <SelectValue />
                                 </SelectTrigger>
@@ -349,7 +400,8 @@ export default function UsersPage() {
                                   </SelectItem>
                                   <SelectItem value="admin">
                                     <div className="flex items-center gap-2">
-                                      <Shield className="h-4 w-4" /> Адміністратор
+                                      <Shield className="h-4 w-4" />{" "}
+                                      Адміністратор
                                     </div>
                                   </SelectItem>
                                 </SelectContent>
@@ -357,7 +409,10 @@ export default function UsersPage() {
                             </div>
                           </div>
                           <DialogFooter>
-                            <Button variant="outline" onClick={() => setEditingUser(null)}>
+                            <Button
+                              variant="outline"
+                              onClick={() => setEditingUser(null)}
+                            >
                               Скасувати
                             </Button>
                             <Button onClick={handleEditUser}>Зберегти</Button>
@@ -367,22 +422,29 @@ export default function UsersPage() {
                       {user.id !== currentUser?.id && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Видалити користувача?</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Видалити користувача?
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Ця дія незворотна. Користувач {user.name} буде видалений назавжди.
+                                Ця дія незворотна. Користувач {user.name} буде
+                                видалений назавжди.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Скасувати</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDeleteUser(user.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-destructive text-white hover:bg-destructive/90"
                               >
                                 Видалити
                               </AlertDialogAction>
@@ -399,5 +461,5 @@ export default function UsersPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
